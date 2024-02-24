@@ -12,7 +12,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .serializers import *
 
 
@@ -20,6 +20,15 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class UserDetailView(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_object(self):
+        username = self.kwargs['username']
+        return get_object_or_404(User, username=username)
 
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
@@ -45,6 +54,16 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class UserProfileView(generics.RetrieveAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_object(self):
+        username = self.kwargs['username']
+        user = get_object_or_404(User, username=username)
+        return get_object_or_404(UserProfile, user=user)
 
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)

@@ -20,7 +20,7 @@ from rest_framework import routers
 from rest_framework_simplejwt import views as jwt_views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.views import TokenRefreshView
-from main_app.views import RegisterView
+from main_app.views import RegisterView, UserDetailView, UserProfileView
 from main_app import views
 
 router = routers.DefaultRouter()
@@ -35,8 +35,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('logout/', views.LogoutView.as_view(), name ='logout'),
     path('register/', RegisterView.as_view(), name='auth_register'),
-    # path('signup/', views.SignupView.as_view(), name='signup'),
+    path('users/<str:username>/', UserDetailView.as_view(), name='user-detail'),
+    path('userprofile/<str:username>/', UserProfileView.as_view(), name='user-profile'),
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
