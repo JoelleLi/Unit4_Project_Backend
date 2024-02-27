@@ -5,10 +5,10 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'first_name', 'last_name', 'groups']
+        fields = ['url', 'username', 'email', 'first_name', 'last_name', 'groups', 'id']
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -20,7 +20,7 @@ class PhotoSerializer(serializers.HyperlinkedModelSerializer):
         model = Photo
         fields = '__all__'
 
-class WishSerializer(serializers.HyperlinkedModelSerializer):
+class WishSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wish
         fields = '__all__'

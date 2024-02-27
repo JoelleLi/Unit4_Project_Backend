@@ -20,7 +20,7 @@ from rest_framework import routers
 from rest_framework_simplejwt import views as jwt_views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.views import TokenRefreshView
-from main_app.views import RegisterView, UserDetailView, UserProfileView
+from main_app.views import RegisterView, UserDetailView, UserProfileView, PersonDetailView, WishDetailView
 from main_app import views
 
 router = routers.DefaultRouter()
@@ -33,12 +33,20 @@ router.register(r'userprofiles', views.UserProfileViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('logout/', views.LogoutView.as_view(), name ='logout'),
-    path('register/', RegisterView.as_view(), name='auth_register'),
-    path('users/<str:username>/', UserDetailView.as_view(), name='user-detail'),
-    path('userprofile/<str:username>/', UserProfileView.as_view(), name='user-profile'),
+    path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+    path('logout/', views.LogoutView.as_view(), name ='auth_logout'),
+    path('register/', views.RegisterView.as_view(), name='auth_register'),
+    # path('register/', views.SignupView.as_view(), name='auth_register'),
+    path('users/<str:username>/', views.UserDetailView.as_view(), name='user-detail'),
+    path('userprofile/', views.UserProfileView.as_view(), name='user-profiles'),
+    path('userprofile/<str:username>/', views.UserProfileView.as_view(), name='user-profile'),
+    path('userprofiles/', views.UserProfileView.as_view(), name='add_user_profile'),
+    path('userprofile/add_photo/<str:username>/', views.add_photo, name='add_photo_user'),
+    path('persons/<str:username>/', views.PersonViewSet.as_view({'get': 'list'}), name='persons_list'),
+    path('persons/profile/<int:id>/', views.PersonDetailView.as_view(), name='person_detail'),
+    path('wishlist/<str:username>/', views.WishViewSet.as_view({'get': 'list'}), name='wishlist'),
+    path('wishlist/wish/<int:id>/', views.WishDetailView.as_view({'get': 'retrieve'}), name='wish_detail'),
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
