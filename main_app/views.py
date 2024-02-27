@@ -14,6 +14,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics
 from django.shortcuts import render, redirect, get_object_or_404
 from .serializers import *
+from django.views.decorators.csrf import csrf_exempt
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
@@ -143,9 +144,10 @@ class RegisterView(generics.CreateAPIView):
 #             return Response(status=status.HTTP_200_OK)
 #         except Exception as e:
 #             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-def add_photo(request, username):
-    user = User.objects.get(username=username)
+    
+@csrf_exempt
+def add_photo(request, id):
+    user_profile = UserProfile.objects.get(id=id)
 
     # photo-file will be the "name" attribute on the <input type="file">
     photo_file = request.FILES.get('photo-file', None)
@@ -153,6 +155,7 @@ def add_photo(request, username):
         s3 = boto3.client('s3')
         # need a unique "key" for S3 / needs image file extension too
         key = uuid.uuid4().hex[:6] + photo_file.name[photo_file.name.rfind('.'):]
+        print (photo_file)
         # just in case something goes wrong
         try:
             bucket = os.environ['S3_BUCKET']
@@ -160,8 +163,13 @@ def add_photo(request, username):
             # build the full url string
             url = f"{os.environ['S3_BASE_URL']}{bucket}/{key}"
             # we can assign to cat_id or cat (if you have a cat object)
-            Photo.objects.create(url=url, user=user)
+            photo = Photo.objects.create(url=url)
+            photo.save()
+            user_profile.image = photo
+            user_profile.save()
+
         except Exception as e:
             print('An error occurred uploading file to S3')
             print(e)
-    return redirect('/user')
+            return JsonResponse(data = {}, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(data = {}, status=status.HTTP_201_CREATED)
