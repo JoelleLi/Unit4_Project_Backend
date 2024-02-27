@@ -37,6 +37,7 @@ urlpatterns = [
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
     path('logout/', views.LogoutView.as_view(), name ='auth_logout'),
     path('register/', views.RegisterView.as_view(), name='auth_register'),
+    path('photos/<int:id>/delete/', views.delete_photo, name='delete_photo'),
     # path('register/', views.SignupView.as_view(), name='auth_register'),
     path('users/<str:username>/', views.UserDetailView.as_view(), name='user-detail'),
     path('userprofile/', views.UserProfileView.as_view(), name='user-profiles'),
@@ -45,8 +46,10 @@ urlpatterns = [
     path('userprofile/<int:id>/add_photo/', views.add_photo, name='add_photo_user'),
     path('persons/<str:username>/', views.PersonViewSet.as_view({'get': 'list'}), name='persons_list'),
     path('persons/profile/<int:id>/', views.PersonDetailView.as_view(), name='person_detail'),
+    path('persons/add/<int:id>/', views.PersonViewSet.as_view({'post': 'post'}), name='add_person'),
     path('wishlist/<str:username>/', views.WishViewSet.as_view({'get': 'list'}), name='wishlist'),
     path('wishlist/wish/<int:id>/', views.WishDetailView.as_view({'get': 'retrieve'}), name='wish_detail'),
+    path('wishlist/add/<int:id>/', views.WishViewSet.as_view({'post': 'post'}), name='add_wish'),
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

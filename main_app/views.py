@@ -52,6 +52,14 @@ class WishViewSet(viewsets.ModelViewSet):
         queryset = Wish.objects.filter(user=user)
         return queryset
     
+    def post(self, request, id):
+        user = User.objects.get(id=id)
+        wish = WishSerializer(data=request.data)
+        if wish.is_valid():
+            wish.save()
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
 class WishDetailView(viewsets.ModelViewSet):
     queryset = Wish.objects.all()
     serializer_class = WishSerializer
@@ -73,6 +81,14 @@ class PersonViewSet(viewsets.ModelViewSet):
         # Filter Person objects based on the user
         queryset = Person.objects.filter(created_by=created_by)
         return queryset
+    
+    def post(self, request, id):
+        user = User.objects.get(id=id)
+        person = PersonSerializer(data=request.data)
+        if person.is_valid():
+            person.save()
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class PersonDetailView(generics.RetrieveAPIView):
     queryset = Person.objects.all()
@@ -173,3 +189,16 @@ def add_photo(request, id):
             print(e)
             return JsonResponse(data = {}, status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse(data = {}, status=status.HTTP_201_CREATED)
+    
+@csrf_exempt
+def delete_photo(request, id):
+    # Retrieve the photo object by its ID
+    photo = Photo.objects.get(id=id)
+
+    try:
+        # Delete the photo object
+        photo.delete()
+        return JsonResponse(data={}, status=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        print('An error occurred while deleting the photo:', e)
+        return JsonResponse(data={}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
