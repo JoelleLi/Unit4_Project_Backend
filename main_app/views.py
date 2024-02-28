@@ -62,15 +62,33 @@ class WishViewSet(viewsets.ModelViewSet):
             return queryset
         
     def post(self, request, id):
-        user = User.objects.get(id=id)
-        wish_serializer = WishSerializer(data=request.data)
-        if wish_serializer.is_valid():
-            wish = wish_serializer.save(user=user)
+        # Check if 'person' is present in the request data
+        if 'person' in request.data:
+            print("Wish is for a person")
+            person_id = request.data['person']
+            person = Person.objects.get(id=person_id)
+            wish_serializer = WishSerializer(data=request.data)
+            if wish_serializer.is_valid():
+                # If the wish is for a person, save it with the associated person
+                wish = wish_serializer.save(person=person)
+                serialized_wish = WishSerializer(wish)
+                return Response(serialized_wish.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(wish_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # If 'person' is not present in the request data, associate the wish with a user
+            user = User.objects.get(id=id)
+            wish_serializer = WishSerializer(data=request.data)
+            if wish_serializer.is_valid():
+                # If the wish is not for a person, save it with the associated user
+                wish = wish_serializer.save(user=user)
+                serialized_wish = WishSerializer(wish)
+                return Response(serialized_wish.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(wish_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
-            serialized_wish = WishSerializer(wish)
-            return Response(serialized_wish.data, status=status.HTTP_201_CREATED)
-        return Response(wish_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+            
 
     
     # def post(self, request, id):
@@ -105,6 +123,14 @@ class WishDetailView(viewsets.ModelViewSet):
         wish = self.get_object()
         wish.delete()
         return Response(status=204)
+    
+    def put(self, request, *args, **kwargs):
+        wish = self.get_object()
+        serializer = self.get_serializer(wish, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    
 
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
