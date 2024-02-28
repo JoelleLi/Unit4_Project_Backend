@@ -50,6 +50,7 @@ urlpatterns = [
     path('persons/<str:username>/', views.PersonViewSet.as_view({'get': 'list'}), name='persons_list'),
     path('persons/profile/<int:id>/', views.PersonDetailView.as_view(), name='person_detail'),
     path('wishlist/<str:username>/', views.WishViewSet.as_view({'get': 'list'}), name='wishlist'),
+    path('wishlist/person/<int:id>/', views.WishViewSet.as_view({'get': 'list'}), name='wishlist_person'),
     path('wishlist/wish/<int:id>/', views.WishDetailView.as_view({'get': 'retrieve'}), name='wish_detail'),
     path('wishlist/add/<int:id>/', views.WishViewSet.as_view({'post': 'post'}), name='add_wish'),
     path('', include(router.urls)),

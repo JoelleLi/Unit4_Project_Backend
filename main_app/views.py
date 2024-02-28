@@ -46,12 +46,21 @@ class WishViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        username = self.kwargs['username']
-        user = get_object_or_404(User, username=username)
-        # Filter Wish objects based on the user's ID
-        queryset = Wish.objects.filter(user=user)
-        return queryset
-    
+        id = self.kwargs.get('id')
+        username = self.kwargs.get('username')
+        if (id):
+            print(id)
+            person = get_object_or_404(Person, id=id)
+            # Filter Wish objects based on the user's ID
+            queryset = Wish.objects.filter(person=person)
+            return queryset
+        elif (username):
+            print(username)
+            user = get_object_or_404(User, username=username)
+            # Filter Wish objects based on the user's ID
+            queryset = Wish.objects.filter(user=user, person=None)
+            return queryset
+        
     def post(self, request, id):
         user = User.objects.get(id=id)
         wish_serializer = WishSerializer(data=request.data)
@@ -61,6 +70,18 @@ class WishViewSet(viewsets.ModelViewSet):
             serialized_wish = WishSerializer(wish)
             return Response(serialized_wish.data, status=status.HTTP_201_CREATED)
         return Response(wish_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+    
+    # def post(self, request, id):
+    #     user = User.objects.get(id=id)
+    #     wish_serializer = WishSerializer(data=request.data)
+    #     if wish_serializer.is_valid():
+    #         wish = wish_serializer.save(user=user)
+            
+    #         serialized_wish = WishSerializer(wish)
+    #         return Response(serialized_wish.data, status=status.HTTP_201_CREATED)
+    #     return Response(wish_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     # def post(self, request, id):
     #     user = User.objects.get(id=id)
@@ -79,6 +100,11 @@ class WishDetailView(viewsets.ModelViewSet):
         id = self.kwargs['id']
         # return get_object_or_404(Person, id=id)
         return Wish.objects.get(pk=id)
+    
+    def delete(self, request, *args, **kwargs):
+        wish = self.get_object()
+        wish.delete()
+        return Response(status=204)
 
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()

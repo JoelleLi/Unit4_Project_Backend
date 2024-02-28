@@ -28,7 +28,7 @@ class Person(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    image = models.ForeignKey(Photo, on_delete=models.CASCADE, null=True, blank=True)
+    image = models.ForeignKey(Photo, null=True, blank=True, on_delete=models.CASCADE)
     birthday = models.DateField(null=True, blank=True)
     address = models.CharField(max_length=200, null=True, blank=True)
     card = models.BooleanField(default=False)
@@ -43,6 +43,11 @@ class Person(models.Model):
 
     def __str__(self):
         return f'Created by: {self.created_by.first_name}, Person: {self.first_name}, ID: ({self.id})'
+    
+    def delete(self, *args, **kwargs):
+        if self.image:  # Check if there is an associated Photo object
+            self.image.delete()  # Delete the Photo object
+        super().delete(*args, **kwargs)  # Call the superclass method to delete the Person object
 
 class Wish(models.Model):
     PRIORITY_CHOICES = [
@@ -62,6 +67,12 @@ class Wish(models.Model):
     
     def __str__(self):
         return f'Name: {self.name}, ID: ({self.id})'
+    
+    def delete(self, *args, **kwargs):
+        # Iterate over the related Photo objects and delete them
+        for photo in self.images.all():
+            photo.delete()
+        super().delete(*args, **kwargs)# Call the superclass method to delete the Person object
 
 class UserProfile(models.Model):
     ALCOHOL_CHOICES = [
