@@ -54,11 +54,21 @@ class WishViewSet(viewsets.ModelViewSet):
     
     def post(self, request, id):
         user = User.objects.get(id=id)
-        wish = WishSerializer(data=request.data)
-        if wish.is_valid():
-            wish.save()
-            return Response(status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        wish_serializer = WishSerializer(data=request.data)
+        if wish_serializer.is_valid():
+            wish = wish_serializer.save(user=user)
+            
+            serialized_wish = WishSerializer(wish)
+            return Response(serialized_wish.data, status=status.HTTP_201_CREATED)
+        return Response(wish_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    # def post(self, request, id):
+    #     user = User.objects.get(id=id)
+    #     wish = WishSerializer(data=request.data)
+    #     if wish.is_valid():
+    #         wish.save()
+    #         return Response(status=status.HTTP_201_CREATED)
+    #     return Response(status=status.HTTP_400_BAD_REQUEST)
     
 class WishDetailView(viewsets.ModelViewSet):
     queryset = Wish.objects.all()
@@ -83,12 +93,14 @@ class PersonViewSet(viewsets.ModelViewSet):
         return queryset
     
     def post(self, request, id):
-        user = User.objects.get(id=id)
-        person = PersonSerializer(data=request.data)
-        if person.is_valid():
-            person.save()
-            return Response(status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(id=id)
+            person_serializer = PersonSerializer(data=request.data)
+            if person_serializer.is_valid():
+                person = person_serializer.save(created_by=user)
+                # Serialize the created person instance
+                serialized_person = PersonSerializer(person)
+                return Response(serialized_person.data, status=status.HTTP_201_CREATED)
+            return Response(person_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PersonDetailView(generics.RetrieveAPIView):
     queryset = Person.objects.all()
@@ -99,6 +111,18 @@ class PersonDetailView(generics.RetrieveAPIView):
         id = self.kwargs['id']
         # return get_object_or_404(Person, id=id)
         return Person.objects.get(pk=id)
+    
+    def put(self, request, *args, **kwargs):
+        person = self.get_object()
+        serializer = self.get_serializer(person, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    
+    def delete(self, request, *args, **kwargs):
+        person = self.get_object()
+        person.delete()
+        return Response(status=204)
 
 class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
@@ -184,6 +208,64 @@ def add_photo(request, id):
             user_profile.image = photo
             user_profile.save()
 
+        except Exception as e:
+            print('An error occurred uploading file to S3')
+            print(e)
+            return JsonResponse(data = {}, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(data = {}, status=status.HTTP_201_CREATED)
+
+@csrf_exempt
+def add_photo_person(request, id):
+    person = Person.objects.get(id=id)
+
+    # photo-file will be the "name" attribute on the <input type="file">
+    photo_file = request.FILES.get('photo-file', None)
+    if photo_file:
+        s3 = boto3.client('s3')
+        # need a unique "key" for S3 / needs image file extension too
+        key = uuid.uuid4().hex[:6] + photo_file.name[photo_file.name.rfind('.'):]
+        print (photo_file)
+        # just in case something goes wrong
+        try:
+            bucket = os.environ['S3_BUCKET']
+            s3.upload_fileobj(photo_file, bucket, key)
+            # build the full url string
+            url = f"{os.environ['S3_BASE_URL']}{bucket}/{key}"
+            # we can assign to cat_id or cat (if you have a cat object)
+            photo = Photo.objects.create(url=url)
+            photo.save()
+            
+            person.image = photo
+            person.save()
+        except Exception as e:
+            print('An error occurred uploading file to S3')
+            print(e)
+            return JsonResponse(data = {}, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(data = {}, status=status.HTTP_201_CREATED)
+    
+@csrf_exempt
+def add_photo_wish(request, id):
+    wish = Wish.objects.get(id=id)
+
+    # photo-file will be the "name" attribute on the <input type="file">
+    photo_file = request.FILES.get('photo-file', None)
+    if photo_file:
+        s3 = boto3.client('s3')
+        # need a unique "key" for S3 / needs image file extension too
+        key = uuid.uuid4().hex[:6] + photo_file.name[photo_file.name.rfind('.'):]
+        print (photo_file)
+        # just in case something goes wrong
+        try:
+            bucket = os.environ['S3_BUCKET']
+            s3.upload_fileobj(photo_file, bucket, key)
+            # build the full url string
+            url = f"{os.environ['S3_BASE_URL']}{bucket}/{key}"
+            # we can assign to cat_id or cat (if you have a cat object)
+            photo = Photo.objects.create(url=url)
+            photo.save()
+            
+            wish.images.add(photo)
+            wish.save()
         except Exception as e:
             print('An error occurred uploading file to S3')
             print(e)
