@@ -34,7 +34,9 @@ SECRET_KEY = 'django-insecure-6mhee90d0!4@=7u%$bscqcob3!1!o2joxk=mmyqtiec--f0u5&
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'localhost'
+    'localhost',
+    'unit4projectbackend-production.up.railway.app',
+    'unit4_project_backend.railway.internal'
 ]
 
 
