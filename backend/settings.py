@@ -78,7 +78,8 @@ ROOT_URLCONF = 'backend.urls'
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000/',
     'http://localhost/',
-    'http://127.0.0.1/'
+    'http://127.0.0.1/',
+    'https://unit4projectfrontend-production.up.railway.app/'
 ]
 
 TEMPLATES = [
