@@ -28,7 +28,7 @@ class Person(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    image = models.ForeignKey(Photo, null=True, blank=True, on_delete=models.CASCADE)
+    image = models.ForeignKey(Photo, null=True, blank=True, on_delete=models.SET_NULL)
     birthday = models.DateField(null=True, blank=True)
     address = models.CharField(max_length=200, null=True, blank=True)
     card = models.BooleanField(default=False)
@@ -89,7 +89,7 @@ class UserProfile(models.Model):
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     birthday = models.DateField(null=True, blank=True)
-    image = models.ForeignKey(Photo, on_delete=models.CASCADE, null=True, blank=True)
+    image = models.ForeignKey(Photo, null=True, blank=True, on_delete=models.SET_NULL)
     colours = models.CharField(max_length=100, blank=True)
     cake = models.CharField(max_length=100, blank=True)
     dietary = models.CharField(max_length=100, blank=True)

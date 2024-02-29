@@ -15,16 +15,22 @@ from rest_framework import generics
 from django.shortcuts import render, redirect, get_object_or_404
 from .serializers import *
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models.functions import Concat
+from django.db.models import F
+from django.db.models.functions import ExtractDay, ExtractMonth
+from django.db.models import Q
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 class UserDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_object(self):
         username = self.kwargs['username']
@@ -33,17 +39,17 @@ class UserDetailView(generics.RetrieveAPIView):
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 class PhotoViewSet(viewsets.ModelViewSet):
     queryset = Photo.objects.all()
     serializer_class = PhotoSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
 class WishViewSet(viewsets.ModelViewSet):
     queryset = Wish.objects.all()
     serializer_class = WishSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         id = self.kwargs.get('id')
@@ -112,7 +118,7 @@ class WishViewSet(viewsets.ModelViewSet):
 class WishDetailView(viewsets.ModelViewSet):
     queryset = Wish.objects.all()
     serializer_class = WishSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     
     def get_object(self):
         id = self.kwargs['id']
@@ -142,6 +148,7 @@ class PersonViewSet(viewsets.ModelViewSet):
         created_by = get_object_or_404(User, username=username)
         # Filter Person objects based on the user
         queryset = Person.objects.filter(created_by=created_by)
+        queryset = queryset.order_by('-birthday')
         return queryset
     
     def post(self, request, id):
