@@ -60,6 +60,10 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_CREDENTIALS = True
 
+CORS_ORIGIN_WHITELIST = [
+    'https://unit4projectfrontend-production.up.railway.app',
+]
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
