@@ -35,8 +35,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
-    'unit4projectbackend-production.up.railway.app',
-    'unit4_project_backend.railway.internal'
+    'birthdaysbe.up.railway.app',
+    'birthdaysbe.railway.internal'
 ]
 
 
@@ -60,10 +60,6 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ORIGIN_WHITELIST = [
-    'https://unit4projectfrontend-production.up.railway.app',
-]
-
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -83,7 +79,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000/',
     'http://localhost/',
     'http://127.0.0.1/',
-    'https://unit4projectfrontend-production.up.railway.app/',
+    'https://birthdays.up.railway.app/',
     'https://*.railway.app/'
 ]
 
