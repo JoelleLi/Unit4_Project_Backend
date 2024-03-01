@@ -35,6 +35,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
+    '127.0.0.1',
     'birthdaysbe.up.railway.app',
     'birthdaysbe.railway.internal'
 ]
