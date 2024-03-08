@@ -58,7 +58,7 @@ class Wish(models.Model):
 
     name = models.CharField(max_length=100)
     images = models.ManyToManyField(Photo, blank=True)    
-    url = models.CharField(max_length=200, blank=True)
+    url = models.CharField(max_length=800, blank=True)
     description = models.CharField(max_length=500, blank=True)
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES)
     reserved = models.BooleanField(default=False)
